@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thai Options Book</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Daily trading statistics for every SET50 index option and USD/THB currency option series listed on TFEX, with a beginner's guide and Excel and PDF downloads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f2f4f6; --panel:#ffffff; --panel-2:#f7f9fa; --ink:#0f1a24; --ink-2:#44515e; --muted:#667380;
+  --line:#dbe1e6; --line-2:#edf0f3; --accent:#0d5c63; --accent-ink:#ffffff; --accent-soft:#e3f0f0;
+  --call:#2a78d6; --put:#eb6834; --fut:#56606b;
+  --call-tint:rgba(42,120,214,.08); --put-tint:rgba(235,104,52,.08); --atm:#fff1c9;
+  --pos:#1a7f37; --neg:#c62828; --shadow:0 8px 28px rgba(15,26,36,.12);
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0d1217; --panel:#151c23; --panel-2:#1a222a; --ink:#eaf0f4; --ink-2:#b9c4ce; --muted:#8b98a5;
+    --line:#27323c; --line-2:#1e2730; --accent:#5fb8bf; --accent-ink:#081417; --accent-soft:#16302f;
+    --call:#3987e5; --put:#d95926; --fut:#aab4be;
+    --call-tint:rgba(57,135,229,.12); --put-tint:rgba(217,89,38,.12); --atm:#3a3216;
+    --pos:#4cc26a; --neg:#f06a6a; --shadow:0 8px 28px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0d1217; --panel:#151c23; --panel-2:#1a222a; --ink:#eaf0f4; --ink-2:#b9c4ce; --muted:#8b98a5;
+  --line:#27323c; --line-2:#1e2730; --accent:#5fb8bf; --accent-ink:#081417; --accent-soft:#16302f;
+  --call:#3987e5; --put:#d95926; --fut:#aab4be;
+  --call-tint:rgba(57,135,229,.12); --put-tint:rgba(217,89,38,.12); --atm:#3a3216;
+  --pos:#4cc26a; --neg:#f06a6a; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:150px}
+body{background:var(--bg);color:var(--ink);font:14px/1.55 var(--sans);margin:0}
+[hidden]{display:none!important}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--cond);font-weight:600;text-wrap:balance;margin:0;letter-spacing:.005em}
+h1{font-size:clamp(26px,3.2vw,34px);line-height:1.1}
+h2{font-size:19px;line-height:1.25}
+h3{font-size:15px}
+.eyebrow{font:500 11px/1.2 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1320px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:10px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 20px;align-items:center}
+.brand{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink)}
+.brand-mark{width:30px;height:30px;flex:none}
+.brand b{font:700 17px/1 var(--cond);letter-spacing:.01em;display:block}
+.brand span{font:500 10.5px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;max-width:560px;justify-self:center;width:100%}
+.switch button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:7px;padding:7px 12px;display:grid;gap:1px;min-width:0}
+.switch button:hover{background:var(--line-2)}
+.switch button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.switch button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.switch .pn{font:600 14.5px/1.2 var(--cond);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switch .ps{font:12px/1.3 var(--mono);opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions{display:flex;gap:8px;align-items:center;position:relative}
+.btn{font:500 13px var(--sans);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 12px;min-height:34px;cursor:pointer;display:inline-flex;gap:7px;align-items:center;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn svg{width:15px;height:15px;flex:none}
+.menu{position:absolute;right:0;top:calc(100% + 8px);width:min(360px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:8px;display:grid;gap:2px;z-index:30}
+.menu .mh{padding:8px 10px 4px}
+.menu button{all:unset;box-sizing:border-box;cursor:pointer;border-radius:7px;padding:8px 10px;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:center}
+.menu button:hover,.menu button:focus-visible{background:var(--panel-2)}
+.menu button:disabled{opacity:.5;cursor:default}
+.menu .ft{font:600 10px/1 var(--mono);letter-spacing:.04em;border-radius:5px;padding:6px 0;text-align:center;color:#fff}
+.ft.x{background:#1d6f42} .ft.p{background:#b3261e}
+.menu .mt{font-size:13.5px;font-weight:500;color:var(--ink)}
+.menu .md{font-size:12px;color:var(--muted);line-height:1.4}
+@media (max-width:860px){
+  .topbar-in{grid-template-columns:minmax(0,1fr) auto}
+  .switch{grid-column:1/-1;grid-row:2;max-width:none}
+  .btn .lbl-long{display:none}
+}
+@media (max-width:520px){.brand span{display:none}.brand b{font-size:15.5px;white-space:nowrap}.brand-mark{width:26px;height:26px}}
+
+/* ---------- layout */
+.wrap{max-width:1320px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:24px 56px;display:grid;gap:22px}
+.hero{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between;align-items:flex-end}
+.hero p{color:var(--ink-2);max-width:72ch;margin:8px 0 0}
+.stamp{font:12px/1.6 var(--mono);color:var(--muted);text-align:right}
+.stamp b{color:var(--ink);font-weight:500}
+@media (max-width:700px){.stamp{text-align:left}}
+
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+@media (max-width:1060px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis .kpi:last-child{grid-column:1/-1}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.kpi .v{font:500 23px/1.2 var(--mono);font-variant-numeric:tabular-nums}
+.kpi .d{font-size:12px;color:var(--muted)}
+.kpi .split{display:flex;flex-wrap:wrap;gap:4px 14px;font:12px var(--mono);color:var(--ink-2)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.dot.c{background:var(--call)} .dot.p{background:var(--put)} .dot.f{background:var(--fut)}
+.toplist{font:12px/1.6 var(--mono);color:var(--ink-2);margin:0;padding:0;list-style:none}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:14px;min-width:0}
+.sec-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:start}
+.step{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:600 14px/28px var(--cond);text-align:center}
+.sec-head p{margin:3px 0 0;color:var(--muted);font-size:13px;max-width:78ch}
+.sec-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:700px){.sec-head{grid-template-columns:auto minmax(0,1fr)}.sec-tools{grid-column:1/-1;justify-content:flex-start}}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:grid;gap:3px}
+.field label,.field .eyebrow{font:500 11px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+select,input[type=date]{font:13px var(--sans);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:6px 8px;min-height:34px;max-width:100%}
+.check{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink-2);min-height:34px}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px}
+.grid-eq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media (max-width:1000px){.grid-2,.grid-eq{grid-template-columns:minmax(0,1fr)}}
+.banner{font-size:13px;padding:9px 12px;border-radius:7px;background:var(--atm);color:var(--ink)}
+.hint{font-size:12.5px;color:var(--ink-2);background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;padding:8px 11px;display:flex;gap:8px;align-items:flex-start}
+.hint svg{width:16px;height:16px;flex:none;margin-top:1px;color:var(--accent)}
+.loading{padding:40px 0;text-align:center;color:var(--muted);font-size:13px}
+
+/* ---------- tables */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:5px 8px;text-align:right;white-space:nowrap}
+thead th{font:500 11px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+tbody td{border-bottom:1px solid var(--line-2);font-family:var(--mono);font-variant-numeric:tabular-nums}
+.chain-wrap{max-height:640px;overflow:auto}
+.chain th.grp{text-align:center;font-size:11px;border-bottom:none;padding-bottom:0}
+.chain th.grp.c{color:var(--call)} .chain th.grp.p{color:var(--put)}
+.chain td.k{text-align:center;font-weight:600;background:var(--panel-2);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.chain tbody tr{cursor:pointer}
+.chain tbody tr:hover td{background:var(--line-2)}
+.chain td.itm.c{background:var(--call-tint)} .chain td.itm.p{background:var(--put-tint)}
+.chain tr.atm td.k{background:var(--atm)}
+.chain tr.sel td.k{outline:2px solid var(--accent);outline-offset:-2px}
+.chain td.na{color:var(--muted);opacity:.55}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--ink-2)}
+.key i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2)}
+.legend .sw{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:3px;margin-right:6px}
+.legend .sw.bar{height:10px;width:10px;vertical-align:-1px}
+.chart{width:100%;min-height:120px;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font:11px var(--mono);fill:var(--muted)}
+.chart .lbl{font:500 11px var(--mono);fill:var(--ink)}
+.chart .grid{stroke:var(--line-2);stroke-width:1}
+.chart .axis{stroke:var(--line);stroke-width:1}
+.chart .cross{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.subhead{font:500 12.5px var(--sans);color:var(--ink-2);margin:0}
+.explorer td.t-c{color:var(--call)} .explorer td.t-p{color:var(--put)}
+.explorer td.l,.explorer th.l{text-align:left}
+.explorer tr.exp td{color:var(--muted);font-style:italic}
+.explorer .tbl{max-height:560px;overflow:auto}
+.xhead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.pager{display:flex;gap:8px;align-items:center}
+
+/* ---------- guide */
+.guide{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.guide-head{display:flex;flex-wrap:wrap;gap:10px 20px;justify-content:space-between;align-items:center;padding:16px 18px;background:linear-gradient(90deg,var(--accent-soft),transparent 70%)}
+.guide-head p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
+.tabs{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;padding:10px 12px;font:500 13px var(--sans);color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tabpanel{padding:18px}
+.tour{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:1000px){.tour{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.tour{grid-template-columns:minmax(0,1fr)}}
+.tour li{border:1px solid var(--line-2);background:var(--panel-2);border-radius:9px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.tour .tn{display:flex;gap:10px;align-items:center}
+.tour .tn span{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:600 13px/24px var(--cond);text-align:center;flex:none}
+.tour p{margin:0;font-size:13px;color:var(--ink-2)}
+.tour a{font-size:12.5px;font-weight:500}
+.terms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 22px;margin:0}
+@media (max-width:1000px){.terms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.terms{grid-template-columns:minmax(0,1fr)}}
+.terms div{border-top:1px solid var(--line-2);padding-top:9px}
+.terms dt{font:600 14px var(--cond)}
+.terms dd{margin:2px 0 0;font-size:13px;color:var(--ink-2)}
+.uses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:760px){.uses{grid-template-columns:minmax(0,1fr)}}
+.uses article{border:1px solid var(--line-2);border-radius:9px;padding:12px 14px;display:grid;gap:5px;align-content:start}
+.uses p{margin:0;font-size:13px;color:var(--ink-2)}
+.uses .how{font-size:12.5px;color:var(--muted)}
+.dl-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.dl-list{grid-template-columns:minmax(0,1fr)}}
+.dl-list div{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:start;border:1px solid var(--line-2);border-radius:9px;padding:12px 14px}
+.dl-list .ft{font:600 10px/1 var(--mono);border-radius:5px;padding:7px 0;text-align:center;color:#fff}
+.dl-list p{margin:2px 0 0;font-size:13px;color:var(--ink-2)}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;max-width:95ch}
+
+#tip{position:fixed;z-index:40;pointer-events:none;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:7px;box-shadow:var(--shadow);padding:8px 10px;font:12px/1.5 var(--mono);max-width:300px}
+#tip b{font-family:var(--sans);font-weight:600}
+#tip .row{display:flex;justify-content:space-between;gap:14px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:13px;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+footer{font-size:12.5px;color:var(--muted);display:grid;gap:6px;border-top:1px solid var(--line);padding-top:16px}
+footer p{margin:0;max-width:110ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top" aria-label="Thai Options Book, back to top">
+      <svg class="brand-mark" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="7" fill="var(--accent)"/><path d="M6 21 L11 14 L15 17 L20 9 L24 12" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="12" r="2" fill="var(--accent-ink)"/></svg>
+      <div><b>Thai Options Book</b><span>Daily TFEX option data</span></div>
+    </a>
+    <div class="switch" role="group" aria-label="Choose a market">
+      <button type="button" id="sw-set50" data-p="set50" aria-pressed="false"><span class="pn">SET50 Index Options</span><span class="ps" id="sw-set50-s">&nbsp;</span></button>
+      <button type="button" id="sw-usdthb" data-p="usdthb" aria-pressed="false"><span class="pn">USD/THB Options</span><span class="ps" id="sw-usdthb-s">&nbsp;</span></button>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="guideBtn" aria-controls="guide"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 1.8c-.5.2-.8.6-.8 1.1v.4" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".4" fill="currentColor"/></svg><span>Guide</span></button>
+      <button type="button" class="btn primary" id="dlBtn" aria-haspopup="true" aria-expanded="false" aria-controls="dlMenu"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M2.5 13.5h11"/></svg><span>Download</span></button>
+      <div class="menu" id="dlMenu" role="menu" hidden>
+        <div class="mh eyebrow" id="dlMenuHead">Download</div>
+        <button type="button" role="menuitem" data-dl="chain-xlsx"><span class="ft x">XLSX</span><span><span class="mt">Option chain, selected day</span><br><span class="md" id="md-chain-x">Every strike, calls and puts, all fields</span></span></button>
+        <button type="button" role="menuitem" data-dl="chain-pdf"><span class="ft p">PDF</span><span><span class="mt">Option chain report</span><br><span class="md">Summary, open interest chart and the chain table</span></span></button>
+        <button type="button" role="menuitem" data-dl="rec-xlsx"><span class="ft x">XLSX</span><span><span class="mt">Filtered records</span><br><span class="md" id="md-rec-x">Rows matching the filters in section 4</span></span></button>
+        <button type="button" role="menuitem" data-dl="rec-pdf"><span class="ft p">PDF</span><span><span class="mt">Filtered records report</span><br><span class="md">Up to 2,000 rows as a printable table</span></span></button>
+        <button type="button" role="menuitem" data-dl="all-xlsx"><span class="ft x">XLSX</span><span><span class="mt">Full dataset</span><br><span class="md" id="md-all-x">Every record plus futures prices</span></span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <section class="hero" aria-labelledby="pTitle">
+    <div>
+      <div class="eyebrow" id="pEyebrow">TFEX</div>
+      <h1 id="pTitle">Thai Options Book</h1>
+      <p id="pBlurb"></p>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Latest session summary"></section>
+
+  <section class="guide" id="guide" aria-labelledby="gTitle">
+    <div class="guide-head">
+      <div><h2 id="gTitle">New to options? Start here</h2><p>A short tour of the page, the key terms, and ideas for putting the data to work.</p></div>
+      <button type="button" class="btn" id="guideHide">Hide guide</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Guide sections">
+      <button type="button" role="tab" id="t-tour" aria-controls="g-tour" aria-selected="true">Tour of the page</button>
+      <button type="button" role="tab" id="t-terms" aria-controls="g-terms" aria-selected="false" tabindex="-1">Key terms</button>
+      <button type="button" role="tab" id="t-uses" aria-controls="g-uses" aria-selected="false" tabindex="-1">Ways to use the data</button>
+      <button type="button" role="tab" id="t-dl" aria-controls="g-dl" aria-selected="false" tabindex="-1">Downloads</button>
+    </div>
+    <div class="tabpanel" role="tabpanel" id="g-tour" aria-labelledby="t-tour">
+      <ol class="tour">
+        <li><div class="tn"><span>A</span><h3>Choose a market</h3></div><p>Use the switch at the top of the page to move between SET50 index options and USD/THB currency options. Every table, chart and download below follows your choice.</p></li>
+        <li><div class="tn"><span>B</span><h3>Read the summary</h3></div><p>The five tiles under the title describe the latest trading day: the futures price, how many contracts traded, how many are still open, the put/call ratio and the most active series.</p></li>
+        <li><div class="tn"><span>1</span><h3>Explore the option chain</h3></div><p>Pick a contract month and a trading day. Calls sit on the left, puts on the right, strike prices in the middle. The yellow strike is the one closest to the futures price; tinted cells are in the money. Use Prev and Next to step through days, and click a row to chart that strike.</p><a href="#s-chain">Go to section 1</a></li>
+        <li><div class="tn"><span>2</span><h3>Follow one strike over time</h3></div><p>See how the call and put premiums at one strike changed every day of the contract, with the futures price underneath for comparison. Move the pointer over a chart to read exact values.</p><a href="#s-hist">Go to section 2</a></li>
+        <li><div class="tn"><span>3</span><h3>See the whole market</h3></div><p>Daily volume across all contract months, and the total open interest of contracts that have not expired, split into calls and puts.</p><a href="#s-act">Go to section 3</a></li>
+        <li><div class="tn"><span>4</span><h3>Filter and download</h3></div><p>Narrow the full record list by month, call or put, strike and date range. Download the result as an Excel workbook for your own analysis or as a PDF report to print or share.</p><a href="#s-rec">Go to section 4</a></li>
+      </ol>
+    </div>
+    <div class="tabpanel" role="tabpanel" id="g-terms" aria-labelledby="t-terms" hidden>
+      <dl class="terms">
+        <div><dt>Call option</dt><dd>The right, not the obligation, to buy the underlying at the strike price. It gains value when the market rises above the strike.</dd></div>
+        <div><dt>Put option</dt><dd>The right to sell the underlying at the strike price. It gains value when the market falls below the strike, which is why puts are used as protection.</dd></div>
+        <div><dt>Strike price</dt><dd>The fixed price written into the option. Each contract month lists many strikes above and below the current market.</dd></div>
+        <div><dt>Contract month and expiry</dt><dd>Options are grouped by the month they expire. The last trading day is shown next to each month in the chain; after it the contract settles and stops trading.</dd></div>
+        <div><dt>Premium</dt><dd>The price of the option, paid by the buyer to the seller. <span class="unit-note"></span></dd></div>
+        <div><dt>Settlement price</dt><dd>The official end-of-day price TFEX sets for every series, including those that did not trade. Use it to compare days consistently.</dd></div>
+        <div><dt>Volume</dt><dd>How many contracts changed hands that day. High volume means the series was actively traded.</dd></div>
+        <div><dt>Open interest (OI)</dt><dd>How many contracts are still open at the end of the day. It rises when new positions are opened and falls when they are closed.</dd></div>
+        <div><dt>Underlying futures</dt><dd class="und-note"></dd></div>
+        <div><dt>In, at and out of the money</dt><dd>A call is in the money when the futures price is above its strike; a put when it is below. The strike closest to the futures price is at the money. The rest are out of the money and hold only time value.</dd></div>
+        <div><dt>Put/call ratio</dt><dd>Put open interest divided by call open interest. Above 1 means more puts are open than calls. Watch how it changes over time rather than reading one day alone.</dd></div>
+        <div><dt>Contract size</dt><dd class="size-note"></dd></div>
+      </dl>
+    </div>
+    <div class="tabpanel" role="tabpanel" id="g-uses" aria-labelledby="t-uses" hidden>
+      <div class="uses">
+        <article><h3>Where are positions concentrated?</h3><p>The open interest chart in section 1 shows how many contracts are open at each strike. Strikes with very large open interest are levels many traders have a stake in, and they are often watched closely as expiry approaches.</p><p class="how">Section 1 · pick the front month and the latest day</p></article>
+        <article><h3>What is the market mood?</h3><p>The put/call ratio in the summary and the open interest lines in section 3 show whether traders are adding puts (protection or bearish views) or calls (bullish views). A steady rise in the ratio says demand for protection is building.</p><p class="how">Summary tiles · section 3</p></article>
+        <article><h3>How fast does time value melt?</h3><p>Choose a strike some distance from the futures price and look at its premium in section 2. With no move in the market, the premium shrinks day by day as expiry nears. The shape of that decline is time decay.</p><p class="how">Section 2 · click an out-of-the-money row in the chain first</p></article>
+        <article><h3>How did options react to a big move?</h3><p>Find a day when the futures price jumped or fell, then use Prev and Next in section 1 to compare premiums and open interest before and after. The Chg columns show each series' change from the previous day.</p><p class="how">Section 1 · Prev / Next buttons</p></article>
+        <article><h3>Compare strikes on one day</h3><p>Reading across one row of the chain shows the call and put at the same strike; reading down a column shows how premiums fall away from the money. This is the quickest way to see what protection costs at different levels.</p><p class="how">Section 1 · the chain table</p></article>
+        <article><h3>Build your own analysis</h3><p>Download the full dataset or a filtered selection as Excel. Each workbook has an About sheet explaining every column, ready for pivot tables and charts.</p><p class="how">Download button · section 4</p></article>
+      </div>
+      <p class="note">This page is for education and research. It does not give investment advice or recommend any trade. Options can lose their entire value; sellers of options can lose more than the premium received.</p>
+    </div>
+    <div class="tabpanel" role="tabpanel" id="g-dl" aria-labelledby="t-dl" hidden>
+      <div class="dl-list">
+        <div><span class="ft x" style="background:#1d6f42">XLSX</span><div><h3>Option chain, selected day</h3><p>The contract month and day chosen in section 1. One row per strike with the call and put side by side: open, high, low, close, settlement, change, volume and open interest.</p></div></div>
+        <div><span class="ft p" style="background:#b3261e">PDF</span><div><h3>Option chain report</h3><p>A landscape report of the same chain: headline figures, an open interest chart by strike and the full chain table, with in-the-money cells shaded.</p></div></div>
+        <div><span class="ft x" style="background:#1d6f42">XLSX</span><div><h3>Filtered records</h3><p>Every daily record that matches the filters in section 4, with all fields TFEX publishes. Leave the filters empty to get everything for this market.</p></div></div>
+        <div><span class="ft p" style="background:#b3261e">PDF</span><div><h3>Filtered records report</h3><p>The same rows as a printable table. PDF is limited to the first 2,000 rows; use Excel for larger selections.</p></div></div>
+        <div><span class="ft x" style="background:#1d6f42">XLSX</span><div><h3>Full dataset</h3><p>All records for the selected market plus a sheet of daily futures prices. The SET50 file holds over 70,000 rows and takes a few seconds to prepare.</p></div></div>
+      </div>
+      <p class="note">Files are created in your browser from the data on this page; nothing is sent anywhere. Use the Download button at the top, or the buttons inside sections 1 and 4.</p>
+    </div>
+  </section>
+
+  <section class="card" id="s-chain" aria-labelledby="h-chain">
+    <div class="sec-head">
+      <span class="step" aria-hidden="true">1</span>
+      <div><h2 id="h-chain">Option chain by day</h2><p>Every strike for one contract month on one trading day. Click a row to chart that strike in section 2.</p></div>
+      <div class="sec-tools"><button type="button" class="btn" data-dl="chain-xlsx">Excel</button><button type="button" class="btn" data-dl="chain-pdf">PDF</button></div>
+    </div>
+    <div class="controls">
+      <div class="field"><label for="selMonth">Contract month</label><select id="selMonth"></select></div>
+      <div class="field"><label for="selDate">Trading day</label><select id="selDate"></select></div>
+      <button type="button" class="btn" id="prevDay" aria-label="Previous trading day">◀ Prev</button>
+      <button type="button" class="btn" id="nextDay" aria-label="Next trading day">Next ▶</button>
+      <div class="field"><span class="eyebrow">Underlying futures</span><span class="num" id="futNow" style="min-height:34px;display:flex;align-items:center"></span></div>
+    </div>
+    <div id="expBanner" class="banner" hidden></div>
+    <div class="grid-2">
+      <div style="display:grid;gap:8px;align-content:start;min-width:0">
+        <div class="key"><span><i style="background:var(--atm)"></i>At the money (closest to futures)</span><span><i style="background:var(--call-tint)"></i>Call in the money</span><span><i style="background:var(--put-tint)"></i>Put in the money</span><span style="color:var(--muted)">– no record that day</span></div>
+        <div class="chain-wrap scroll"><table class="chain" id="chain"></table></div>
+      </div>
+      <div style="display:grid;gap:8px;align-content:start;min-width:0">
+        <p class="subhead">Open interest by strike (contracts)</p>
+        <div class="legend"><span><span class="sw bar" style="background:var(--call)"></span>Calls</span><span><span class="sw bar" style="background:var(--put)"></span>Puts</span><span><span class="sw" style="background:var(--fut)"></span>Futures settlement</span></div>
+        <div class="chart" id="oiChart"></div>
+        <p class="subhead">Volume by strike (contracts)</p>
+        <div class="chart" id="volChart"></div>
+        <div class="hint"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".5" fill="currentColor"/></svg><span>Tall bars mark strikes where many contracts are open. Hover a bar for the exact figures at that strike.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="s-hist" aria-labelledby="h-hist">
+    <div class="sec-head">
+      <span class="step" aria-hidden="true">2</span>
+      <div><h2 id="h-hist">Strike history</h2><p id="histNote"></p></div>
+      <div class="sec-tools"></div>
+    </div>
+    <div class="controls">
+      <div class="field"><label for="selStrike">Strike</label><select id="selStrike"></select></div>
+      <div class="legend" style="align-self:center"><span><span class="sw" style="background:var(--call)"></span>Call settlement</span><span><span class="sw" style="background:var(--put)"></span>Put settlement</span></div>
+    </div>
+    <div class="chart" id="histChart"></div>
+    <p class="subhead" id="futHead">Futures settlement</p>
+    <div class="chart" id="futChart"></div>
+  </section>
+
+  <section id="s-act" class="grid-eq" aria-label="Market activity">
+    <div class="card">
+      <div class="sec-head"><span class="step" aria-hidden="true">3</span><div><h2>Daily volume, all months</h2><p>Contracts traded per day, calls stacked on puts.</p></div><div></div></div>
+      <div class="legend"><span><span class="sw bar" style="background:var(--call)"></span>Calls</span><span><span class="sw bar" style="background:var(--put)"></span>Puts</span></div>
+      <div class="chart" id="actVol"></div>
+    </div>
+    <div class="card">
+      <div class="sec-head"><span class="step" aria-hidden="true" style="visibility:hidden">3</span><div><h2>Open interest, live contracts</h2><p>Contracts still open at the end of each day, before their expiry.</p></div><div></div></div>
+      <div class="legend"><span><span class="sw" style="background:var(--call)"></span>Calls</span><span><span class="sw" style="background:var(--put)"></span>Puts</span></div>
+      <div class="chart" id="actOI"></div>
+    </div>
+  </section>
+
+  <section class="card explorer" id="s-rec" aria-labelledby="h-x">
+    <div class="sec-head">
+      <span class="step" aria-hidden="true">4</span>
+      <div><h2 id="h-x">All daily records</h2><p>One row per series per trading day, including days a series did not trade (then only settlement and open interest are published). Filter, then download.</p></div>
+      <div class="sec-tools"><button type="button" class="btn" data-dl="rec-xlsx">Excel</button><button type="button" class="btn" data-dl="rec-pdf">PDF</button></div>
+    </div>
+    <div class="controls">
+      <div class="field"><label for="xMonth">Contract month</label><select id="xMonth"></select></div>
+      <div class="field"><label for="xType">Type</label><select id="xType"><option value="">Calls and puts</option><option value="C">Calls</option><option value="P">Puts</option></select></div>
+      <div class="field"><label for="xStrike">Strike</label><select id="xStrike"></select></div>
+      <div class="field"><label for="xFrom">From</label><input type="date" id="xFrom"></div>
+      <div class="field"><label for="xTo">To</label><input type="date" id="xTo"></div>
+      <label class="check" for="xTraded"><input type="checkbox" id="xTraded"> Traded days only</label>
+      <button type="button" class="btn" id="xReset">Clear filters</button>
+    </div>
+    <div class="xhead"><span id="xCount"></span><span class="pager"><button type="button" class="btn" id="xPrev" aria-label="Previous page">◀</button><span id="xPage" class="num"></span><button type="button" class="btn" id="xNext" aria-label="Next page">▶</button></span></div>
+    <div class="tbl scroll"><table id="xTable"></table></div>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+<div id="tip" hidden></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const MAN={"generated":"2026-09-26 08:11","products":{"set50":{"last":"2026-09-25","front":"09/2026","fut":"S50U26","futSettle":1078,"series":1200,"rows":71390,"fetched":"2026-09-26T08:10:59+07:00"},"usdthb":{"last":"2026-09-25","front":"09/2026","fut":"USDU26","futSettle":33.37,"series":268,"rows":13940,"fetched":"2026-09-26T08:10:32+07:00"}}};
+const CFG={
+  set50:{id:'set50',name:'SET50 Index Options',short:'SET50',eyebrow:'TFEX · Equity index options',fut:'SET50 futures',
+    kdp:0,adp:2,unit:'index points',file:'SET50-options',
+    blurb:'Options on the SET50 index, the 50 largest companies on the Stock Exchange of Thailand. Every call and put series TFEX has listed, at every strike, for every trading day.',
+    premium:'SET50 premiums are quoted in index points; one contract is THB 200 per point, so a premium of 12.50 costs THB 2,500.',
+    und:'SET50 index futures for the same contract month. Options settle against the SET50 index at expiry, so the futures price is the reference for which strikes are in the money.',
+    size:'One SET50 option is worth THB 200 per index point. A move of 10 points in the premium is THB 2,000 per contract.',
+    final:'final SET50 settlement value',
+    src:'https://www.tfex.co.th/th/market-data/historical-data/trading-statistics-by-series?instrumentType=TXI_O'},
+  usdthb:{id:'usdthb',name:'USD/THB Options',short:'USD/THB',eyebrow:'TFEX · Currency options',fut:'USD futures',
+    kdp:2,adp:4,unit:'THB per USD 1',file:'USDTHB-options',
+    blurb:'Options on the US dollar against the Thai baht. Every call and put series TFEX has listed, at every strike, for every trading day.',
+    premium:'USD/THB premiums are quoted in THB per USD 1; one contract covers USD 1,000, so a premium of 0.25 costs THB 250.',
+    und:'USD/THB futures for the same contract month. Options settle against the final USD/THB rate, so the futures price is the reference for which strikes are in the money.',
+    size:'One USD/THB option covers USD 1,000. A premium change of 0.10 is THB 100 per contract.',
+    final:'final USD/THB settlement rate',
+    src:'https://www.tfex.co.th/th/market-data/historical-data/trading-statistics-by-series?instrumentType=TXC_O'}
+};
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fN=v=>v==null?'–':Math.round(v).toLocaleString('en-US');
+const fP=v=>v==null?'–':v.toFixed(2);
+const fC=v=>v==null?'–':(v>0.00001?'+':v<-0.00001?'−':'')+Math.abs(v).toFixed(2);
+const cls=v=>v==null?'':v>0.00001?'pos':v<-0.00001?'neg':'';
+const mkey=m=>m.slice(3)+m.slice(0,2);
+const mName=m=>MN[+m.slice(0,2)-1]+' '+m.slice(3);
+const dLong=d=>+d.slice(8)+' '+MN[+d.slice(5,7)-1]+' '+d.slice(0,4);
+const dShort=d=>+d.slice(8)+' '+MN[+d.slice(5,7)-1];
+const store={get(k){try{return localStorage.getItem('tob.'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('tob.'+k,v)}catch(e){}}};
+let P=null;               // current product: config + data + indexes
+const DATA={};            // loaded products by id
+const kf=k=>P&&P.cfg.kdp?k.toFixed(P.cfg.kdp):String(k);
+const fA=v=>v==null?'–':v.toFixed(P.cfg.adp);
+
+// ---------- data
+function indexProduct(id,D){
+  const S=D.series;
+  S.forEach(s=>{s.byD={};s.r.forEach(r=>{r[0]=D.dates[r[0]];s.byD[r[0]]=r})});
+  const byMonth={};S.forEach(s=>(byMonth[s.m]??=[]).push(s));
+  const MONTHS=Object.keys(byMonth).sort((a,b)=>mkey(a)<mkey(b)?-1:1);
+  const FUT={};
+  for(const [sym,f] of Object.entries(D.futures)){f.sym=sym;f.byD={};f.r.forEach(r=>{r[0]=D.dates[r[0]];f.byD[r[0]]=r});FUT[f.m]=f}
+  const ALLD=[...new Set(S.flatMap(s=>s.r.map(r=>r[0])))].sort();
+  const LAST=ALLD[ALLD.length-1];
+  const ltdOf=m=>byMonth[m][0].ltd;
+  const live=MONTHS.filter(m=>ltdOf(m)>LAST);
+  const mD={},mK={};
+  return {id,cfg:CFG[id],D,S,byMonth,MONTHS,FUT,ALLD,LAST,ltdOf,FRONT:live[0]||MONTHS[MONTHS.length-1],XR:null,
+    mDates:m=>mD[m]??=[...new Set(byMonth[m].flatMap(s=>s.r.map(r=>r[0])))].sort(),
+    strikesOf:m=>mK[m]??=[...new Set(byMonth[m].map(s=>s.k))].sort((a,b)=>a-b),
+    find:(m,k,t)=>byMonth[m].find(s=>s.k===k&&s.t===t),
+    futOn:(m,d)=>{const f=FUT[m];return f&&f.byD[d]?f.byD[d][1]:null}};
+}
+async function loadProduct(id){
+  if(DATA[id])return DATA[id];
+  const v=encodeURIComponent(MAN?.generated||'');
+  const r=await fetch(`data/${id}.json?v=${v}`);
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  return DATA[id]=indexProduct(id,await r.json());
+}
+
+// ---------- tooltip + toast
+const tip=$('#tip');
+function showTip(html,ev){tip.innerHTML=html;tip.hidden=false;
+  const w=tip.offsetWidth,h=tip.offsetHeight;let x=ev.clientX+14,y=ev.clientY+14;
+  if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14;
+  tip.style.left=Math.max(8,x)+'px';tip.style.top=Math.max(8,y)+'px'}
+const hideTip=()=>{tip.hidden=true};
+const trow=(sw,label,val)=>`<div class="row"><span>${sw?`<span class="dot ${sw}"></span>`:''}${label}</span><span>${val}</span></div>`;
+let toastT;function toast(msg,ms=3500){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,ms)}
+
+// ---------- chart helpers
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function niceTicks(lo,hi,c=5){if(!(hi>lo)){hi=lo+1;lo=lo-1}
+  const raw=(hi-lo)/c,p=10**Math.floor(Math.log10(raw)),e=raw/p;
+  const st=(e<1.5?1:e<3?2:e<7?5:10)*p,out=[];
+  for(let v=Math.floor(lo/st)*st;v<=Math.ceil(hi/st)*st+st/2;v+=st)out.push(+v.toFixed(10));return out}
+function svgFor(host,H){host.innerHTML='';const W=Math.max(300,host.clientWidth||600);
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'img'},host);return [svg,W]}
+function yAxis(svg,W,m,ticks,y,fmt){for(const t of ticks){el('line',{x1:m.l,x2:W-m.r,y1:y(t),y2:y(t),class:'grid'},svg);
+  const tx=el('text',{x:m.l-6,y:y(t)+4,'text-anchor':'end'},svg);tx.textContent=fmt(t)}}
+const kfmt=v=>v>=1e6?(v/1e6)+'M':v>=1000?(v/1000)+'k':v;
+function dateTicks(svg,dates,x,yb){
+  const idx=[];dates.forEach((d,i)=>{if(i===0||d.slice(0,7)!==dates[i-1].slice(0,7))idx.push(i)});
+  let lastX=-1e9;for(const i of idx){const px=x(i);if(px-lastX<52)continue;lastX=px;
+    el('line',{x1:px,x2:px,y1:yb,y2:yb+4,class:'axis'},svg);
+    const t=el('text',{x:px,y:yb+16,'text-anchor':'start'},svg);t.textContent=MN[+dates[i].slice(5,7)-1]+(dates[i].slice(5,7)==='01'||i===idx[0]?' '+dates[i].slice(2,4):'')}}
+function lineChart(host,{dates,series,H=240,fmt=fP,tipFn,endLabels=true}){
+  const n=dates.length;if(!n){host.innerHTML='<p class="subhead">No data for this selection.</p>';return}
+  const [svg,W]=svgFor(host,H);const m={l:56,r:endLabels?68:16,t:10,b:26};
+  const vals=series.flatMap(s=>s.v.filter(v=>v!=null));if(!vals.length){host.innerHTML='<p class="subhead">No data for this selection.</p>';return}
+  const tk=niceTicks(Math.min(...vals),Math.max(...vals));const lo=tk[0],hi=tk[tk.length-1];
+  const x=i=>m.l+(n<=1?(W-m.l-m.r)/2:i*(W-m.l-m.r)/(n-1)),y=v=>m.t+(hi-v)/(hi-lo)*(H-m.t-m.b);
+  yAxis(svg,W,m,tk,y,fmt);el('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:'axis'},svg);
+  dateTicks(svg,dates,x,H-m.b);
+  for(const s of series){let d='',pen=false;
+    s.v.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true});
+    el('path',{d,fill:'none',stroke:s.color,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+    let li=-1;for(let i=n-1;i>=0;i--)if(s.v[i]!=null){li=i;break}
+    if(li>=0){el('circle',{cx:x(li),cy:y(s.v[li]),r:4,fill:s.color,stroke:'var(--panel)','stroke-width':2},svg);
+      if(endLabels){const t=el('text',{x:x(li)+8,y:y(s.v[li])+4,class:'lbl'},svg);t.textContent=fmt(s.v[li])}}}
+  const cross=el('line',{y1:m.t,y2:H-m.b,class:'cross',visibility:'hidden'},svg);
+  const dots=series.map(s=>el('circle',{r:4,fill:s.color,stroke:'var(--panel)','stroke-width':2,visibility:'hidden'},svg));
+  const hit=el('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'},svg);
+  hit.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)*W/r.width;
+    const i=Math.max(0,Math.min(n-1,Math.round((px-m.l)/((W-m.l-m.r)/Math.max(1,n-1)))));
+    cross.setAttribute('x1',x(i));cross.setAttribute('x2',x(i));cross.setAttribute('visibility','visible');
+    series.forEach((s,j)=>{const v=s.v[i];if(v==null)dots[j].setAttribute('visibility','hidden');
+      else{dots[j].setAttribute('cx',x(i));dots[j].setAttribute('cy',y(v));dots[j].setAttribute('visibility','visible')}});
+    showTip(`<b>${dLong(dates[i])}</b>`+(tipFn?tipFn(i):series.map(s=>trow(s.sw,s.name,fmt(s.v[i]))).join('')),ev)});
+  hit.addEventListener('mouseleave',()=>{cross.setAttribute('visibility','hidden');dots.forEach(d=>d.setAttribute('visibility','hidden'));hideTip()});
+}
+function stackBars(host,{dates,series,H=220,tipFn}){
+  const [svg,W]=svgFor(host,H);const m={l:56,r:16,t:10,b:26},n=dates.length;
+  const tot=dates.map((_,i)=>series.reduce((a,s)=>a+(s.v[i]||0),0));
+  const tk=niceTicks(0,Math.max(...tot,1));const hi=tk[tk.length-1];
+  const y=v=>m.t+(hi-v)/hi*(H-m.t-m.b),slot=(W-m.l-m.r)/n,bw=Math.max(1,slot-(slot>4?1:0)),x=i=>m.l+i*slot;
+  yAxis(svg,W,m,tk,y,kfmt);
+  for(let i=0;i<n;i++){let base=0;series.forEach(s=>{const v=s.v[i]||0;if(!v)return;
+    const top=y(base+v),bot=y(base)-(base?1:0);el('rect',{x:x(i),y:top,width:bw,height:Math.max(.5,bot-top),fill:s.color},svg);base+=v})}
+  el('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:'axis'},svg);
+  dateTicks(svg,dates,i=>x(i)+bw/2,H-m.b);
+  const hl=el('rect',{y:m.t,height:H-m.t-m.b,width:Math.max(slot,3),fill:'var(--ink)',opacity:.06,visibility:'hidden'},svg);
+  const hit=el('rect',{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:'transparent'},svg);
+  hit.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)*W/r.width;
+    const i=Math.max(0,Math.min(n-1,Math.floor((px-m.l)/slot)));hl.setAttribute('x',x(i));hl.setAttribute('visibility','visible');
+    showTip(`<b>${dLong(dates[i])}</b>`+(tipFn?tipFn(i):''),ev)});
+  hit.addEventListener('mouseleave',()=>{hl.setAttribute('visibility','hidden');hideTip()});
+}
+function strikeBars(host,{strikes,call,put,F,H=200,tipFn}){
+  const [svg,W]=svgFor(host,H);const m={l:56,r:16,t:16,b:26},n=strikes.length;
+  const mx=Math.max(1,...call.map(v=>v||0),...put.map(v=>v||0));const tk=niceTicks(0,mx);const hi=tk[tk.length-1];
+  const y=v=>m.t+(hi-v)/hi*(H-m.t-m.b),slot=(W-m.l-m.r)/n,cx=i=>m.l+(i+.5)*slot;
+  const bw=Math.min(16,Math.max(1.5,(slot-3)/2));
+  yAxis(svg,W,m,tk,y,kfmt);
+  const bar=(x0,v,c)=>{if(!v)return;const t=y(v),b=H-m.b,w=bw,r=Math.min(3,w/2,b-t);
+    el('path',{d:`M${x0} ${b}V${t+r}Q${x0} ${t} ${x0+r} ${t}H${x0+w-r}Q${x0+w} ${t} ${x0+w} ${t+r}V${b}Z`,fill:c},svg)};
+  strikes.forEach((k,i)=>{bar(cx(i)-bw-.5,call[i],'var(--call)');bar(cx(i)+.5,put[i],'var(--put)');
+    if(i%Math.max(1,Math.ceil(44/slot))===0){const t=el('text',{x:cx(i),y:H-m.b+16,'text-anchor':'middle'},svg);t.textContent=kf(k)}});
+  el('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,class:'axis'},svg);
+  if(F!=null&&n>1){const pos=(F-strikes[0])/(strikes[n-1]-strikes[0])*(n-1);
+    if(pos>=-.5&&pos<=n-.5){const px=cx(pos);el('line',{x1:px,x2:px,y1:m.t-6,y2:H-m.b,stroke:'var(--fut)','stroke-width':1.5,'stroke-dasharray':'4 3'},svg);
+      const t=el('text',{x:px+(px>W-110?-4:4),y:m.t-2,class:'lbl','text-anchor':px>W-110?'end':'start'},svg);t.textContent='F '+F.toFixed(2)}}
+  strikes.forEach((k,i)=>{const h=el('rect',{x:cx(i)-slot/2,y:m.t,width:slot,height:H-m.t-m.b,fill:'transparent'},svg);
+    h.addEventListener('mousemove',ev=>showTip(tipFn(i),ev));h.addEventListener('mouseleave',hideTip)});
+}
+
+// ---------- header, KPIs, text that follows the product
+function renderHeader(){
+  const c=P.cfg;
+  document.title=`${c.name} · Thai Options Book`;
+  $('#pEyebrow').textContent=c.eyebrow;$('#pTitle').textContent=c.name;
+  $('#pBlurb').innerHTML=`${esc(c.blurb)} Source: <a href="${c.src}" target="_blank" rel="noopener">TFEX trading statistics by series</a>. Premiums in ${esc(c.unit)}.`;
+  $('#stamp').innerHTML=`Data through <b>${dLong(P.LAST)}</b><br>${P.S.length.toLocaleString('en-US')} series · ${P.ALLD.length} trading days<br>updated ${esc((P.D.fetched||'–').replace('T',' ').slice(0,16))} ICT`;
+  $$('.unit-note').forEach(e=>e.textContent=c.premium);
+  $$('.und-note').forEach(e=>e.textContent=c.und);
+  $$('.size-note').forEach(e=>e.textContent=c.size);
+  $('#histNote').textContent=`Daily settlement premium of the call and put at one strike through the life of the contract. The expiry day is left out because TFEX reports the ${c.final} there instead of a premium.`;
+  $('#dlMenuHead').textContent=`Download · ${c.name}`;
+  const L=P.LAST,today=P.S.map(s=>[s,s.byD[L]]).filter(([,r])=>r);
+  const sum=(arr,t,i)=>arr.filter(([s])=>s.t===t).reduce((a,[,r])=>a+(r[i]||0),0);
+  const vC=sum(today,'C',9),vP=sum(today,'P',9),live=today.filter(([s])=>s.ltd>L);
+  const oC=sum(live,'C',10),oP=sum(live,'P',10),F=P.futOn(P.FRONT,L);
+  const top=today.filter(([,r])=>r[9]).sort((a,b)=>b[1][9]-a[1][9]).slice(0,3);
+  const days=Math.round((new Date(P.ltdOf(P.FRONT))-new Date(L))/864e5);
+  $('#kpis').innerHTML=`
+   <div class="kpi"><span class="eyebrow">${esc(c.fut)} ${esc(P.FUT[P.FRONT]?.sym||'')}</span><span class="v">${F==null?'–':F.toFixed(2)}</span><span class="d">Settlement ${dShort(L)} · front month ${mName(P.FRONT)} expires in ${days} day${days===1?'':'s'}</span></div>
+   <div class="kpi"><span class="eyebrow">Volume ${dShort(L)}</span><span class="v">${fN(vC+vP)}</span><span class="split"><span><span class="dot c"></span>Calls ${fN(vC)}</span><span><span class="dot p"></span>Puts ${fN(vP)}</span></span></div>
+   <div class="kpi"><span class="eyebrow">Open interest, live contracts</span><span class="v">${fN(oC+oP)}</span><span class="split"><span><span class="dot c"></span>Calls ${fN(oC)}</span><span><span class="dot p"></span>Puts ${fN(oP)}</span></span></div>
+   <div class="kpi"><span class="eyebrow">Put/call OI ratio</span><span class="v">${oC?(oP/oC).toFixed(2):'–'}</span><span class="d">Put open interest ÷ call open interest, all live months</span></div>
+   <div class="kpi"><span class="eyebrow">Most traded ${dShort(L)}</span><ul class="toplist">${top.length?top.map(([s,r])=>`<li><span class="dot ${s.t==='C'?'c':'p'}"></span>${esc(s.s)} · ${fN(r[9])}</li>`).join(''):'<li>No trades</li>'}</ul></div>`;
+  $('#foot').innerHTML=`<p>${esc(c.premium)} On a contract's last trading day TFEX reports the ${esc(c.final)} in the settlement column; the chain shows the payoff that value implies instead of a premium. Days a series did not trade carry a settlement price and open interest only.</p>
+   <p>Data: <a href="${c.src}" target="_blank" rel="noopener">TFEX, trading statistics by series</a>, collected each morning with the previous session's figures. This is an independent page, not affiliated with TFEX or the Stock Exchange of Thailand. For education and research only; not investment advice. Page built ${esc(MAN?.generated||'')} ICT.</p>`;
+}
+
+// ---------- 1. chain
+let curM=null,curD=null,curK=null;
+function fillMonth(){const s=$('#selMonth');s.innerHTML=P.MONTHS.slice().reverse().map(m=>`<option value="${m}">${mName(m)} · expires ${dShort(P.ltdOf(m))}${P.ltdOf(m)<=P.LAST?' (expired)':''}</option>`).join('');s.value=curM}
+function fillDates(keep){const ds=P.mDates(curM);const s=$('#selDate');
+  s.innerHTML=ds.slice().reverse().map(d=>`<option value="${d}">${dLong(d)}${d===P.ltdOf(curM)?' · expiry day':''}</option>`).join('');
+  curD=keep&&ds.includes(keep)?keep:(ds.filter(d=>d<P.ltdOf(curM)).pop()||ds[ds.length-1]);s.value=curD}
+function chainState(){
+  const ks=P.strikesOf(curM),isExp=curD===P.ltdOf(curM);
+  let F=P.futOn(curM,curD),finalV=null;
+  if(isExp){for(const s of P.byMonth[curM]){const r=s.byD[curD];if(r&&r[6]!=null){finalV=r[6];break}}F=finalV??F}
+  const atm=F==null?null:ks.reduce((a,k)=>Math.abs(k-F)<Math.abs(a-F)?k:a,ks[0]);
+  const rec=(k,t)=>{const s=P.find(curM,k,t);return s&&s.byD[curD]||null};
+  const settle=(r,t,k)=>{if(!r||r[6]==null)return null;if(!isExp)return r[6];return t==='C'?Math.max(0,r[6]-k):Math.max(0,k-r[6])};
+  return {ks,isExp,F,finalV,atm,rec,settle};
+}
+function renderChain(){
+  const {ks,isExp,F,finalV,atm,rec,settle}=chainState(),ds=P.mDates(curM),c=P.cfg;
+  $('#prevDay').disabled=ds.indexOf(curD)<=0;$('#nextDay').disabled=ds.indexOf(curD)>=ds.length-1;
+  $('#futNow').innerHTML=F==null?'–':`<span class="dot f"></span>${esc(P.FUT[curM]?.sym||'')} ${F.toFixed(2)}${isExp?' final':''}`;
+  const eb=$('#expBanner');eb.hidden=!isExp;
+  if(isExp)eb.textContent=`${dLong(curD)} is the last trading day of the ${mName(curM)} contract. TFEX settles every series at the ${c.final}, ${finalV?.toFixed(2)}. The Settle column shows the payoff that value implies: for a call, the final value minus the strike; for a put, the strike minus the final value; never below zero.`;
+  if(curK==null||!ks.includes(curK))curK=atm??ks[Math.floor(ks.length/2)];
+  let h=`<thead><tr><th class="grp c" colspan="5">Calls</th><th></th><th class="grp p" colspan="5">Puts</th></tr>
+   <tr><th>Vol</th><th>OI</th><th>Close</th><th>Chg</th><th>Settle</th><th style="text-align:center">Strike</th><th>Settle</th><th>Chg</th><th>Close</th><th>OI</th><th>Vol</th></tr></thead><tbody>`;
+  const chg=r=>r&&!isExp?`<span class="${cls(r[7])}">${fC(r[7])}</span>`:'–';
+  for(const k of ks){const rc=rec(k,'C'),rp=rec(k,'P');
+    const ic=F!=null&&k<F?' itm c':' c',ip=F!=null&&k>F?' itm p':' p',nc=rc?'':' na',np=rp?'':' na';
+    h+=`<tr data-k="${k}" class="${k===atm?'atm':''}${k===curK?' sel':''}" tabindex="0" aria-label="Strike ${kf(k)}">
+      <td class="${ic}${nc}">${rc?fN(rc[9]):'–'}</td><td class="${ic}${nc}">${rc?fN(rc[10]):'–'}</td><td class="${ic}${nc}">${rc?fP(rc[5]):'–'}</td><td class="${ic}${nc}">${chg(rc)}</td><td class="${ic}${nc}"><b>${fP(settle(rc,'C',k))}</b></td>
+      <td class="k">${kf(k)}</td>
+      <td class="${ip}${np}"><b>${fP(settle(rp,'P',k))}</b></td><td class="${ip}${np}">${chg(rp)}</td><td class="${ip}${np}">${rp?fP(rp[5]):'–'}</td><td class="${ip}${np}">${rp?fN(rp[10]):'–'}</td><td class="${ip}${np}">${rp?fN(rp[9]):'–'}</td></tr>`}
+  $('#chain').innerHTML=h+'</tbody>';
+  $$('#chain tbody tr').forEach(tr=>{const go=()=>{curK=+tr.dataset.k;renderChain();renderHist()};
+    tr.addEventListener('click',go);tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+  const get=(k,t,i)=>{const r=rec(k,t);return r?r[i]:null};
+  const tipK=i=>{const k=ks[i];return `<b>Strike ${kf(k)}</b>`+trow('c','Call OI',fN(get(k,'C',10)))+trow('p','Put OI',fN(get(k,'P',10)))+trow('c','Call volume',fN(get(k,'C',9)))+trow('p','Put volume',fN(get(k,'P',9)))+trow('c','Call settle',fP(settle(rec(k,'C'),'C',k)))+trow('p','Put settle',fP(settle(rec(k,'P'),'P',k)))};
+  strikeBars($('#oiChart'),{strikes:ks,call:ks.map(k=>get(k,'C',10)),put:ks.map(k=>get(k,'P',10)),F,tipFn:tipK});
+  strikeBars($('#volChart'),{strikes:ks,call:ks.map(k=>get(k,'C',9)),put:ks.map(k=>get(k,'P',9)),F,H:150,tipFn:tipK});
+  const ss=$('#selStrike');ss.innerHTML=ks.map(k=>`<option value="${k}">${kf(k)}</option>`).join('');ss.value=curK;
+  $('#md-chain-x').textContent=`${mName(curM)} contract, ${dLong(curD)}: ${ks.length} strikes, calls and puts`;
+}
+
+// ---------- 2. strike history
+function renderHist(){
+  const ltd=P.ltdOf(curM),ds=P.mDates(curM).filter(d=>d<ltd);
+  const c=P.find(curM,curK,'C'),p=P.find(curM,curK,'P');
+  const pick=(s,i)=>ds.map(d=>s&&s.byD[d]?s.byD[d][i]:null);
+  const cs=pick(c,6),ps=pick(p,6),cv=pick(c,9),pv=pick(p,9),co=pick(c,10),po=pick(p,10);
+  const fut=ds.map(d=>P.futOn(curM,d));
+  $('#h-hist').textContent=`Strike history · ${mName(curM)} ${kf(curK)}`;
+  lineChart($('#histChart'),{dates:ds,H:260,series:[{name:'Call',color:'var(--call)',sw:'c',v:cs},{name:'Put',color:'var(--put)',sw:'p',v:ps}],
+    tipFn:i=>trow('c',`${c?c.s:'Call'} settle`,fP(cs[i]))+trow('','volume / OI',`${fN(cv[i])} / ${fN(co[i])}`)+trow('p',`${p?p.s:'Put'} settle`,fP(ps[i]))+trow('','volume / OI',`${fN(pv[i])} / ${fN(po[i])}`)+trow('f','Futures',fP(fut[i]))});
+  $('#futHead').textContent=`${P.cfg.fut} ${P.FUT[curM]?.sym||''} settlement over the same days`;
+  lineChart($('#futChart'),{dates:ds,H:170,series:[{name:'Futures',color:'var(--fut)',sw:'f',v:fut}]});
+}
+
+// ---------- 3. market activity
+function renderActivity(){
+  const A=P.ALLD,vc=A.map(()=>0),vp=A.map(()=>0),oc=A.map(()=>0),op=A.map(()=>0),ix={};A.forEach((d,i)=>ix[d]=i);
+  for(const s of P.S)for(const r of s.r){const i=ix[r[0]];(s.t==='C'?vc:vp)[i]+=r[9]||0;if(r[0]<s.ltd)(s.t==='C'?oc:op)[i]+=r[10]||0}
+  stackBars($('#actVol'),{dates:A,series:[{color:'var(--call)',v:vc},{color:'var(--put)',v:vp}],
+    tipFn:i=>trow('c','Calls',fN(vc[i]))+trow('p','Puts',fN(vp[i]))+trow('','Total',fN(vc[i]+vp[i]))});
+  lineChart($('#actOI'),{dates:A,H:220,fmt:v=>v>=1000?(v/1000).toFixed(v%1000?1:0)+'k':fN(v),series:[{name:'Calls',color:'var(--call)',sw:'c',v:oc},{name:'Puts',color:'var(--put)',sw:'p',v:op}],
+    tipFn:i=>trow('c','Call OI',fN(oc[i]))+trow('p','Put OI',fN(op[i]))+trow('','Put/call',oc[i]?(op[i]/oc[i]).toFixed(2):'–')});
+}
+
+// ---------- 4. records
+let xPage=0,xRows=[];const PER=100;
+function allRecords(){if(P.XR)return P.XR;const X=[];for(const s of P.S)for(const r of s.r)X.push([s,r]);
+  X.sort((a,b)=>a[1][0]<b[1][0]?1:a[1][0]>b[1][0]?-1:mkey(a[0].m)<mkey(b[0].m)?-1:mkey(a[0].m)>mkey(b[0].m)?1:a[0].k-b[0].k||(a[0].t<b[0].t?-1:1));
+  return P.XR=X}
+function fillX(){$('#xMonth').innerHTML='<option value="">All months</option>'+P.MONTHS.slice().reverse().map(m=>`<option value="${m}">${mName(m)}</option>`).join('');
+  const ks=[...new Set(P.S.map(s=>s.k))].sort((a,b)=>a-b);$('#xStrike').innerHTML='<option value="">All strikes</option>'+ks.map(k=>`<option value="${k}">${kf(k)}</option>`).join('');
+  $('#xFrom').min=$('#xTo').min=P.ALLD[0];$('#xFrom').max=$('#xTo').max=P.LAST;
+  $('#md-all-x').textContent=`All ${allRecords().length.toLocaleString('en-US')} records plus daily futures prices`}
+function xFilter(){return {m:$('#xMonth').value,t:$('#xType').value,k:$('#xStrike').value,f:$('#xFrom').value,to:$('#xTo').value,tr:$('#xTraded').checked}}
+function filterX(){const q=xFilter();
+  xRows=allRecords().filter(([s,r])=>(!q.m||s.m===q.m)&&(!q.t||s.t===q.t)&&(!q.k||s.k===+q.k)&&(!q.f||r[0]>=q.f)&&(!q.to||r[0]<=q.to)&&(!q.tr||r[9]));xPage=0;renderX()}
+function filterText(){const q=xFilter(),p=[];p.push(q.m?mName(q.m)+' contract':'all contract months');p.push(q.t==='C'?'calls':q.t==='P'?'puts':'calls and puts');
+  if(q.k)p.push('strike '+kf(+q.k));if(q.f||q.to)p.push(`${q.f?dLong(q.f):'start'} to ${q.to?dLong(q.to):dLong(P.LAST)}`);if(q.tr)p.push('traded days only');return p.join(', ')}
+function renderX(){const pages=Math.max(1,Math.ceil(xRows.length/PER));xPage=Math.min(xPage,pages-1);
+  $('#xCount').textContent=`${xRows.length.toLocaleString('en-US')} records · volume ${fN(xRows.reduce((a,[,r])=>a+(r[9]||0),0))} contracts`;
+  $('#md-rec-x').textContent=`${xRows.length.toLocaleString('en-US')} rows: ${filterText()}`;
+  $('#xPage').textContent=`${xPage+1} / ${pages}`;$('#xPrev').disabled=xPage===0;$('#xNext').disabled=xPage>=pages-1;
+  let h='<thead><tr><th class="l">Date</th><th class="l">Series</th><th class="l">Month</th><th class="l">Type</th><th>Strike</th><th>Open</th><th>High</th><th>Low</th><th>Average</th><th>Close</th><th>Settle</th><th>Chg</th><th>% Chg</th><th>Volume</th><th>OI</th></tr></thead><tbody>';
+  for(const [s,r] of xRows.slice(xPage*PER,xPage*PER+PER)){const exp=r[0]>=s.ltd;
+    h+=`<tr class="${exp?'exp':''}" title="${exp?'Expiry day: settlement is the '+P.cfg.final:''}"><td class="l">${r[0]}</td><td class="l">${esc(s.s)}</td><td class="l">${s.m}</td><td class="l t-${s.t.toLowerCase()}">${s.t==='C'?'Call':'Put'}</td><td>${kf(s.k)}</td><td>${fP(r[1])}</td><td>${fP(r[2])}</td><td>${fP(r[3])}</td><td>${fA(r[4])}</td><td>${fP(r[5])}</td><td><b>${fP(r[6])}</b></td><td class="${exp?'':cls(r[7])}">${exp?'–':fC(r[7])}</td><td>${exp||r[8]==null?'–':r[8].toFixed(1)+'%'}</td><td>${fN(r[9])}</td><td>${fN(r[10])}</td></tr>`}
+  $('#xTable').innerHTML=h+'</tbody>'}
+
+// ---------- downloads (libraries load on first use)
+const LIBS={xlsx:['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'],
+  pdf:['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js']};
+const loaded={};
+function script(src){return loaded[src]??=new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>{delete loaded[src];no(new Error('Could not load '+src))};document.head.appendChild(s)})}
+async function lib(name){for(const s of LIBS[name])await script(s)}
+const stampNow=()=>new Date().toLocaleString('en-GB',{timeZone:'Asia/Bangkok',dateStyle:'medium',timeStyle:'short'})+' ICT';
+// Excel date serials, written as numbers: SheetJS's Date conversion drifts by a few seconds under
+// time zones with a historical local-mean-time offset (Asia/Bangkok gives 00:00:04)
+const xDate=d=>(Date.UTC(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10))-Date.UTC(1899,11,30))/864e5;
+const REC_HEAD=['Date','Series','Contract month','Type','Strike','Last trading date','Open','High','Low','Average','Close','Settlement','Change','% Change','Volume','Open interest','Note'];
+function aboutSheet(title,extra){const c=P.cfg;const rows=[['Thai Options Book'],[title],[],['Market',c.name],['Source','TFEX, trading statistics by series'],['Source link',c.src],
+  ['Data through',P.LAST],['Created',stampNow()],['Units',`Premiums, prices and settlements in ${c.unit}. ${c.size}`],...extra,[],['Column','Meaning'],
+  ['Open / High / Low / Close','Prices traded during the day. Empty when the series did not trade.'],['Average','Volume-weighted average traded price.'],
+  ['Settlement','Official end-of-day price set by TFEX for every series, traded or not.'],['Change / % Change','Change in settlement from the previous trading day.'],
+  ['Volume','Contracts traded that day.'],['Open interest','Contracts still open at the end of the day.'],
+  ['Expiry day',`On the last trading day TFEX puts the ${c.final} in the settlement column instead of an option premium.`],[],
+  ['Disclaimer','For education and research only. Not investment advice. Independent page, not affiliated with TFEX.']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:26},{wch:110}];return ws}
+function sheetFrom(head,rows,widths,fmts){const ws=XLSX.utils.aoa_to_sheet([head,...rows]);
+  ws['!cols']=widths.map(w=>({wch:w}));const rng=XLSX.utils.decode_range(ws['!ref']);ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:0,c:rng.e.c}})};
+  if(fmts)for(let R=1;R<=rng.e.r;R++)for(const [C,z] of Object.entries(fmts)){const a=XLSX.utils.encode_cell({r:R,c:+C});if(ws[a]&&ws[a].t==='n')ws[a].z=z}
+  return ws}
+function recRow(s,r){const exp=r[0]>=s.ltd;return [xDate(r[0]),s.s,s.m,s.t==='C'?'Call':'Put',s.k,xDate(s.ltd),r[1],r[2],r[3],r[4],r[5],r[6],r[7]==null?null:+r[7].toFixed(6),r[8]==null?null:+r[8].toFixed(2),r[9],r[10],exp?'Expiry day: settlement = '+P.cfg.final:null]}
+const REC_W=[11,16,9,6,8,11,9,9,9,10,9,10,9,9,9,11,40];
+const REC_F={0:'yyyy-mm-dd',5:'yyyy-mm-dd',6:'0.00',7:'0.00',8:'0.00',9:'0.00',10:'0.00',11:'0.00',12:'0.00',13:'0.00',14:'#,##0',15:'#,##0'};
+function futSheet(){const rows=[];for(const f of Object.values(P.FUT))for(const r of f.r)rows.push([xDate(r[0]),f.sym,f.m,r[1],r[2],r[3],r[4]]);
+  rows.sort((a,b)=>a[0]-b[0]||(a[1]<b[1]?-1:1));
+  return sheetFrom(['Date','Futures','Contract month','Settlement','Close','Volume','Open interest'],rows,[11,10,14,11,10,11,13],{0:'yyyy-mm-dd',3:'0.00',4:'0.00',5:'#,##0',6:'#,##0'})}
+function save(wb,name){XLSX.writeFile(wb,name,{compression:true});toast('Downloaded '+name)}
+async function xlsxChain(){await lib('xlsx');const st=chainState(),c=P.cfg,wb=XLSX.utils.book_new();
+  const side=(k,t)=>{const r=st.rec(k,t);if(!r)return [null,null,null,null,null,null,null,null];return [r[1],r[2],r[3],r[5],st.settle(r,t,k),st.isExp?null:r[7],r[9],r[10]]};
+  const money=(k,t)=>st.F==null?'':k===st.atm?'ATM':(t==='C'?k<st.F:k>st.F)?'ITM':'OTM';
+  const rows=st.ks.map(k=>[...side(k,'C'),money(k,'C'),k,money(k,'P'),...side(k,'P')]);
+  const sub=['Open','High','Low','Close',st.isExp?'Payoff':'Settle','Change','Volume','OI'];
+  const head=[...sub.map(x=>'Call '+x),'Call money','Strike','Put money',...sub.map(x=>'Put '+x)];
+  const f={};[0,1,2,3,4,5,11,12,13,14,15,16].forEach(i=>f[i]='0.00');[6,7,17,18].forEach(i=>f[i]='#,##0');f[9]=c.kdp?'0.00':'0';
+  XLSX.utils.book_append_sheet(wb,sheetFrom(head,rows,[...Array(8).fill(10),10,9,10,...Array(8).fill(10)],f),'Chain');
+  XLSX.utils.book_append_sheet(wb,aboutSheet(`Option chain · ${mName(curM)} contract · ${dLong(curD)}`,[['Contract month',mName(curM)],['Last trading date',P.ltdOf(curM)],['Trading day',curD],
+    [st.isExp?'Final settlement value':'Futures settlement',st.F==null?'':`${P.FUT[curM]?.sym||''} ${st.F.toFixed(2)}`],['Money columns','ITM = in the money, ATM = strike closest to the futures price, OTM = out of the money'],
+    ...(st.isExp?[['Payoff columns','Expiry day: payoff at the final value (call: final − strike, put: strike − final, floored at zero)']]:[])]),'About');
+  save(wb,`${c.file}_chain_${mkey(curM)}_${curD}.xlsx`)}
+async function xlsxRecords(all){await lib('xlsx');const rows=(all?allRecords():xRows).map(([s,r])=>recRow(s,r)),wb=XLSX.utils.book_new();
+  if(!rows.length){toast('No records match the filters. Clear a filter and try again.');return}
+  REC_F[9]=P.cfg.adp===4?'0.0000':'0.00';REC_F[4]=P.cfg.kdp?'0.00':'0';
+  XLSX.utils.book_append_sheet(wb,sheetFrom(REC_HEAD,rows,REC_W,REC_F),'Records');
+  XLSX.utils.book_append_sheet(wb,futSheet(),'Futures');
+  XLSX.utils.book_append_sheet(wb,aboutSheet(all?'Full dataset':'Filtered records',[['Selection',all?'Every record':filterText()],['Rows',rows.length]]),'About');
+  save(wb,`${P.cfg.file}_${all?'all-records':'records'}_${P.LAST}.xlsx`)}
+
+const RGB={ink:[15,26,36],muted:[102,115,128],line:[219,225,230],call:[42,120,214],put:[235,104,52],fut:[86,96,107],accent:[13,92,99],
+  callT:[234,242,251],putT:[253,239,233],atm:[255,241,201],head:[242,244,246]};
+const pdfNum=v=>v==null?'-':v.toFixed(2),pdfInt=v=>v==null?'-':Math.round(v).toLocaleString('en-US'),pdfChg=v=>v==null?'-':(v>0?'+':'')+v.toFixed(2);
+function pdfDoc(){const {jsPDF}=window.jspdf;return new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true})}
+function pdfHeader(doc,title,sub){const W=doc.internal.pageSize.getWidth();
+  doc.setFillColor(...RGB.accent);doc.rect(0,0,W,3,'F');
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...RGB.muted);doc.text('THAI OPTIONS BOOK  ·  '+P.cfg.name.toUpperCase(),12,11);
+  doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(...RGB.ink);doc.text(title,12,19);
+  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(...RGB.muted);doc.text(sub,12,25);return 31}
+function pdfFooter(doc){const n=doc.internal.getNumberOfPages(),W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight();
+  for(let i=1;i<=n;i++){doc.setPage(i);doc.setDrawColor(...RGB.line);doc.line(12,H-10,W-12,H-10);doc.setFontSize(7.5);doc.setTextColor(...RGB.muted);
+    doc.text(`Source: TFEX trading statistics by series. Premiums in ${P.cfg.unit}. Education and research only, not investment advice. Created ${stampNow()}.`,12,H-6);
+    doc.text(`Page ${i} of ${n}`,W-12,H-6,{align:'right'})}}
+function pdfStrikeChart(doc,x0,y0,w,h,ks,call,put,F,flabel='Futures'){
+  const mx=Math.max(1,...call.map(v=>v||0),...put.map(v=>v||0)),tk=niceTicks(0,mx),hi=tk[tk.length-1],l=16,b=7;
+  const pw=w-l,ph=h-b,y=v=>y0+ph-(v/hi)*ph,slot=pw/ks.length,bw=Math.min(3.2,Math.max(.35,(slot-.4)/2));
+  doc.setFontSize(7);doc.setTextColor(...RGB.muted);doc.setDrawColor(...RGB.line);doc.setLineWidth(.2);
+  for(const t of tk){doc.line(x0+l,y(t),x0+w,y(t));doc.text(kfmt(t)+'',x0+l-2,y(t)+1,{align:'right'})}
+  ks.forEach((k,i)=>{const cx=x0+l+(i+.5)*slot;
+    if(call[i]){doc.setFillColor(...RGB.call);doc.rect(cx-bw-.1,y(call[i]),bw,y0+ph-y(call[i]),'F')}
+    if(put[i]){doc.setFillColor(...RGB.put);doc.rect(cx+.1,y(put[i]),bw,y0+ph-y(put[i]),'F')}
+    if(i%Math.max(1,Math.ceil(9/slot))===0)doc.text(kf(k),cx,y0+ph+4.5,{align:'center'})});
+  doc.setDrawColor(...RGB.muted);doc.line(x0+l,y0+ph,x0+w,y0+ph);
+  if(F!=null&&ks.length>1){const pos=(F-ks[0])/(ks[ks.length-1]-ks[0])*(ks.length-1);
+    if(pos>=-.5&&pos<=ks.length-.5){const px=x0+l+(pos+.5)*slot;doc.setDrawColor(...RGB.fut);doc.setLineWidth(.35);doc.setLineDashPattern([1.2,1],0);doc.line(px,y0-1,px,y0+ph);doc.setLineDashPattern([],0);
+      doc.setTextColor(...RGB.ink);doc.text(flabel+' '+F.toFixed(2),px+1.2,y0+1.5)}}
+  doc.setLineWidth(.2)}
+async function pdfChain(){await lib('pdf');const st=chainState(),c=P.cfg,doc=pdfDoc(),W=doc.internal.pageSize.getWidth();
+  const fsym=P.FUT[curM]?.sym||'',sub=`${mName(curM)} contract (last trading day ${dLong(P.ltdOf(curM))})  ·  trading day ${dLong(curD)}  ·  ${st.F==null?'no futures price':(st.isExp?'final value ':fsym+' futures ')+st.F.toFixed(2)}`;
+  let y=pdfHeader(doc,'Option chain',sub);
+  const tot=(t,i)=>st.ks.reduce((a,k)=>a+((st.rec(k,t)||[])[i]||0),0),oC=tot('C',10),oP=tot('P',10);
+  const kp=[['Call volume',pdfInt(tot('C',9))],['Put volume',pdfInt(tot('P',9))],['Call open interest',pdfInt(oC)],['Put open interest',pdfInt(oP)],['Put/call OI ratio',oC?(oP/oC).toFixed(2):'-'],['Strikes listed',String(st.ks.length)]];
+  const kw=(W-24)/kp.length;kp.forEach(([a,v],i)=>{const x=12+i*kw;doc.setFillColor(...RGB.head);doc.roundedRect(x,y,kw-3,14,1.5,1.5,'F');
+    doc.setFontSize(7);doc.setTextColor(...RGB.muted);doc.text(a.toUpperCase(),x+3,y+5);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...RGB.ink);doc.text(v,x+3,y+11.2);doc.setFont('helvetica','normal')});
+  y+=21;doc.setFontSize(9);doc.setTextColor(...RGB.ink);doc.setFont('helvetica','bold');doc.text('Open interest by strike (contracts)',12,y);doc.setFont('helvetica','normal');
+  const lg=[['Calls',RGB.call],['Puts',RGB.put]];let lx=W-12-44;lg.forEach(([t,col])=>{doc.setFillColor(...col);doc.rect(lx,y-2.6,3,3,'F');doc.setFontSize(8);doc.setTextColor(...RGB.muted);doc.text(t,lx+4.5,y);lx+=20});
+  pdfStrikeChart(doc,12,y+4,W-24,40,st.ks,st.ks.map(k=>(st.rec(k,'C')||[])[10]),st.ks.map(k=>(st.rec(k,'P')||[])[10]),st.F,st.isExp?'Final':'Futures');
+  y+=51;
+  const set=st.isExp?'Payoff':'Settle';
+  const body=st.ks.map(k=>{const rc=st.rec(k,'C'),rp=st.rec(k,'P');
+    return [rc?pdfInt(rc[9]):'-',rc?pdfInt(rc[10]):'-',rc?pdfNum(rc[5]):'-',rc&&!st.isExp?pdfChg(rc[7]):'-',pdfNum(st.settle(rc,'C',k)),kf(k),pdfNum(st.settle(rp,'P',k)),rp&&!st.isExp?pdfChg(rp[7]):'-',rp?pdfNum(rp[5]):'-',rp?pdfInt(rp[10]):'-',rp?pdfInt(rp[9]):'-']});
+  doc.autoTable({startY:y,margin:{left:12,right:12,bottom:14},theme:'plain',
+    head:[[{content:'CALLS',colSpan:5,styles:{halign:'center',textColor:RGB.call}},{content:'',styles:{}},{content:'PUTS',colSpan:5,styles:{halign:'center',textColor:RGB.put}}],
+      ['Volume','OI','Close','Change',set,'Strike',set,'Change','Close','OI','Volume']],
+    body,styles:{font:'helvetica',fontSize:7.6,cellPadding:{top:1.1,bottom:1.1,left:1.6,right:1.6},halign:'right',textColor:RGB.ink,lineColor:RGB.line,lineWidth:{bottom:.15}},
+    headStyles:{fontStyle:'bold',textColor:RGB.muted,fillColor:[255,255,255],fontSize:7.2},
+    columnStyles:{4:{fontStyle:'bold'},5:{halign:'center',fontStyle:'bold',fillColor:RGB.head},6:{fontStyle:'bold'}},
+    didParseCell:d=>{if(d.section!=='body')return;const k=st.ks[d.row.index];
+      if(d.column.index===5&&k===st.atm)d.cell.styles.fillColor=RGB.atm;
+      if(st.F!=null&&d.column.index<5&&k<st.F)d.cell.styles.fillColor=RGB.callT;
+      if(st.F!=null&&d.column.index>5&&k>st.F)d.cell.styles.fillColor=RGB.putT}});
+  let fy=doc.lastAutoTable.finalY+4.5;const H=doc.internal.pageSize.getHeight();if(fy>H-19){doc.addPage();fy=20}
+  doc.setFontSize(7.5);doc.setTextColor(...RGB.muted);
+  doc.text(doc.splitTextToSize(`How to read: calls on the left, puts on the right, strike in the middle. Yellow strike = closest to the futures price (at the money). Blue and orange shading = in the money. OI = open interest. ${st.isExp?`Expiry day: the ${set} columns show the payoff at the ${c.final}.`:'Change = change in settlement from the previous trading day.'}`,W-24),12,fy);
+  pdfFooter(doc);const name=`${c.file}_chain_${mkey(curM)}_${curD}.pdf`;doc.save(name);toast('Downloaded '+name)}
+async function pdfRecords(){if(!xRows.length){toast('No records match the filters. Clear a filter and try again.');return}
+  await lib('pdf');const doc=pdfDoc(),CAP=2000,rows=xRows.slice(0,CAP);
+  let y=pdfHeader(doc,'Daily records',`${filterText()}  ·  ${xRows.length.toLocaleString('en-US')} rows${xRows.length>CAP?`, first ${CAP.toLocaleString('en-US')} shown (download Excel for all)`:''}`);
+  doc.autoTable({startY:y,margin:{left:12,right:12,bottom:14},theme:'plain',
+    head:[['Date','Series','Month','Type','Strike','Open','High','Low','Average','Close','Settle','Change','% Chg','Volume','OI']],
+    body:rows.map(([s,r])=>{const exp=r[0]>=s.ltd;return [r[0],s.s,s.m,s.t==='C'?'Call':'Put',kf(s.k),pdfNum(r[1]),pdfNum(r[2]),pdfNum(r[3]),r[4]==null?'-':r[4].toFixed(P.cfg.adp),pdfNum(r[5]),pdfNum(r[6])+(exp?' *':''),exp?'-':pdfChg(r[7]),exp||r[8]==null?'-':r[8].toFixed(1)+'%',pdfInt(r[9]),pdfInt(r[10])]}),
+    styles:{font:'helvetica',fontSize:7,cellPadding:{top:.9,bottom:.9,left:1.4,right:1.4},halign:'right',textColor:RGB.ink,lineColor:RGB.line,lineWidth:{bottom:.12}},
+    headStyles:{fontStyle:'bold',textColor:RGB.muted,fillColor:RGB.head},columnStyles:{0:{halign:'left'},1:{halign:'left'},2:{halign:'left'},3:{halign:'left'},10:{fontStyle:'bold'}},
+    didParseCell:d=>{if(d.section==='body'&&d.column.index===3)d.cell.styles.textColor=d.cell.raw==='Call'?RGB.call:RGB.put}});
+  const H=doc.internal.pageSize.getHeight();let fy=doc.lastAutoTable.finalY+5;if(fy>H-18){doc.addPage();fy=20}
+  doc.setFontSize(7.5);doc.setTextColor(...RGB.muted);doc.text(`* Expiry day: settlement is the ${P.cfg.final}, not a premium.`,12,fy);
+  pdfFooter(doc);const name=`${P.cfg.file}_records_${P.LAST}.pdf`;doc.save(name);toast('Downloaded '+name)}
+const DL={'chain-xlsx':xlsxChain,'chain-pdf':pdfChain,'rec-xlsx':()=>xlsxRecords(false),'rec-pdf':pdfRecords,'all-xlsx':()=>xlsxRecords(true)};
+async function runDL(kind,btn){if(!P)return;closeMenu();const bs=$$(`[data-dl="${kind}"]`);bs.forEach(b=>b.disabled=true);toast('Preparing your file…',60000);
+  try{await new Promise(r=>setTimeout(r,30));await DL[kind]()}
+  catch(e){console.error(e);toast('The download could not be created: '+(e.message||e)+'. Check your connection and try again.',7000)}
+  finally{bs.forEach(b=>b.disabled=false)}}
+
+// ---------- menu, guide, product switch
+const dlBtn=$('#dlBtn'),menu=$('#dlMenu');
+function closeMenu(){menu.hidden=true;dlBtn.setAttribute('aria-expanded','false')}
+dlBtn.addEventListener('click',e=>{e.stopPropagation();const open=menu.hidden;menu.hidden=!open;dlBtn.setAttribute('aria-expanded',String(open));if(open)menu.querySelector('button')?.focus()});
+document.addEventListener('click',e=>{if(!menu.hidden&&!menu.contains(e.target))closeMenu()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!menu.hidden){closeMenu();dlBtn.focus()}});
+$$('[data-dl]').forEach(b=>b.addEventListener('click',()=>runDL(b.dataset.dl,b)));
+function setGuide(show,scroll){$('#guide').hidden=!show;$('#guideBtn').setAttribute('aria-pressed',String(show));store.set('guide',show?'1':'0');if(show&&scroll)$('#guide').scrollIntoView({behavior:'smooth',block:'start'})}
+$('#guideBtn').addEventListener('click',()=>{const g=$('#guide');if(g.hidden)setGuide(true,true);else g.scrollIntoView({behavior:'smooth',block:'start'})});
+$('#guideHide').addEventListener('click',()=>setGuide(false));
+const TABS=$$('.tabs [role=tab]');
+function selTab(t){TABS.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;$('#'+x.getAttribute('aria-controls')).hidden=!on})}
+TABS.forEach((t,i)=>{t.addEventListener('click',()=>selTab(t));t.addEventListener('keydown',e=>{const d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(d){const n=TABS[(i+d+TABS.length)%TABS.length];selTab(n);n.focus()}})});
+
+function switchSubs(){for(const [id,h] of Object.entries(MAN?.products||{})){const e=$(`#sw-${id}-s`);if(e)e.textContent=h.fut&&h.futSettle!=null?`${h.fut} ${h.futSettle.toFixed(2)} · ${dShort(h.last)}`:`data through ${dShort(h.last)}`}}
+function busy(msg){for(const id of ['#chain','#oiChart','#volChart','#histChart','#futChart','#actVol','#actOI','#xTable'])$(id).innerHTML=id==='#chain'||id==='#xTable'?`<tbody><tr><td class="loading">${msg}</td></tr></tbody>`:`<p class="loading">${msg}</p>`}
+let switching=null;
+async function show(id){if(!CFG[id])id='set50';if(P&&P.id===id)return;
+  $$('.switch button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.p===id)));
+  store.set('product',id);if(location.hash.slice(1)!==id)history.replaceState(null,'','#'+id);
+  const my=switching=id;
+  if(!DATA[id]){$('#pTitle').textContent=CFG[id].name;$('#pEyebrow').textContent=CFG[id].eyebrow;busy(`Loading ${CFG[id].name}…`)}
+  let prod;try{prod=await loadProduct(id)}catch(e){if(my===switching)busy(`The ${CFG[id].name} data could not be loaded (${esc(e.message)}). Refresh the page to try again.`);return}
+  if(my!==switching)return;
+  P=prod;curM=P.FRONT;curD=null;curK=null;
+  renderHeader();fillMonth();fillDates();renderChain();renderHist();renderActivity();fillX();
+  ['xMonth','xType','xStrike','xFrom','xTo'].forEach(i=>$('#'+i).value='');$('#xTraded').checked=false;filterX()}
+$$('.switch button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.p)));
+addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(CFG[h])show(h)});
+
+// ---------- control wiring
+$('#selMonth').addEventListener('change',e=>{curM=e.target.value;curK=null;fillDates(curD);renderChain();renderHist()});
+$('#selDate').addEventListener('change',e=>{curD=e.target.value;renderChain()});
+const step=d=>{const ds=P.mDates(curM),i=ds.indexOf(curD)+d;if(i>=0&&i<ds.length){curD=ds[i];$('#selDate').value=curD;renderChain()}};
+$('#prevDay').addEventListener('click',()=>step(-1));$('#nextDay').addEventListener('click',()=>step(1));
+$('#selStrike').addEventListener('change',e=>{curK=+e.target.value;renderChain();renderHist()});
+['xMonth','xType','xStrike','xFrom','xTo','xTraded'].forEach(id=>$('#'+id).addEventListener('change',filterX));
+$('#xReset').addEventListener('click',()=>{['xMonth','xType','xStrike','xFrom','xTo'].forEach(i=>$('#'+i).value='');$('#xTraded').checked=false;filterX()});
+$('#xPrev').addEventListener('click',()=>{xPage--;renderX()});$('#xNext').addEventListener('click',()=>{xPage++;renderX()});
+let rt,lastW=innerWidth;addEventListener('resize',()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(rt);rt=setTimeout(()=>{if(P){renderChain();renderHist();renderActivity()}},150)});
+
+// ---------- start
+switchSubs();
+setGuide(store.get('guide')!=='0',false);
+show(CFG[location.hash.slice(1)]?location.hash.slice(1):(store.get('product')||'set50'));
+</script>
+</body>
+</html>
